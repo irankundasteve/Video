@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
+import { execSync } from 'child_process';
 
 const IMAGES = [
     "https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=1280",
@@ -25,23 +26,35 @@ const IMAGES = [
     "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?q=80&w=1280"
 ];
 
-const downloadImage = async (url, filepath) => {
-    try {
-        const response = await axios({
-            url,
-            method: 'GET',
-            responseType: 'stream'
-        });
-        return new Promise((resolve, reject) => {
-            const writer = fs.createWriteStream(filepath);
-            response.data.pipe(writer);
-            writer.on('error', reject);
-            writer.on('finish', () => resolve(filepath));
-        });
-    } catch (e) {
-        console.error(`Failed to download ${url}: ${e.message}`);
-        return null;
+const downloadImage = async (url, filepath, retries = 5) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await axios({
+                url,
+                method: 'GET',
+                responseType: 'stream',
+                timeout: 30000,
+                headers: { 'User-Agent': 'Mozilla/5.0' }
+            });
+            return new Promise((resolve, reject) => {
+                const writer = fs.createWriteStream(filepath);
+                response.data.pipe(writer);
+                writer.on('error', reject);
+                writer.on('finish', () => {
+                    if (fs.statSync(filepath).size > 1000) {
+                        resolve(true);
+                    } else {
+                        reject(new Error("File too small"));
+                    }
+                });
+            });
+        } catch (e) {
+            console.error(`Attempt ${i + 1} failed for ${url}: ${e.message}`);
+            if (i === retries - 1) return false;
+            await new Promise(r => setTimeout(r, 2000));
+        }
     }
+    return false;
 };
 
 async function main() {
@@ -53,8 +66,21 @@ async function main() {
     console.log("Starting image downloads...");
     for (let i = 0; i < IMAGES.length; i++) {
         const dest = path.join(dir, `img_${i}.jpg`);
-        await downloadImage(IMAGES[i], dest);
-        console.log(`Downloaded ${i + 1}/${IMAGES.length}`);
+        const success = await downloadImage(IMAGES[i], dest);
+        
+        if (success) {
+            console.log(`Downloaded ${i + 1}/${IMAGES.length}`);
+        } else {
+            console.warn(`Creating fallback for image ${i}`);
+            // Use ffmpeg to create a colored placeholder if download fails
+            try {
+                execSync(`ffmpeg -y -f lavfi -i "color=c=gray:s=1280x720" -frames:v 1 "${dest}"`);
+            } catch (err) {
+                console.error("Failed to create fallback image with ffmpeg");
+                // Last resort: touch the file to at least exist
+                fs.writeFileSync(dest, "");
+            }
+        }
     }
 }
 
