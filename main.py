@@ -10,18 +10,18 @@ TRANSITION_DURATION = 2.0
 CLIP_LEN = (TOTAL_DURATION + (NUM_CLIPS - 1) * TRANSITION_DURATION) / NUM_CLIPS
 TARGET_SIZE = (1280, 720)
 
-# Use HTTPS URLs for reliability
+# Use more engaging animal and nature URLs
 URLS = [
+    "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a1/Cheetahs_on_the_Edge_%28Director%27s_Cut%29.ogv/Cheetahs_on_the_Edge_%28Director%27s_Cut%29.ogv.480p.vp9.webm",
+    "https://upload.wikimedia.org/wikipedia/commons/transcoded/3/38/Lion_%28Panthera_leo%29_walking_on_the_road.webm/Lion_%28Panthera_leo%29_walking_on_the_road.webm.480p.vp9.webm",
+    "https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a7/Lion_%28Panthera_leo%29_sniffing_at_the_ground.webm/Lion_%28Panthera_leo%29_sniffing_at_the_ground.webm.480p.vp9.webm",
+    "https://upload.wikimedia.org/wikipedia/commons/transcoded/0/0e/2023-08-18_ZOO_LJUBLJANA_Panthera_leo_persica_AZIJSKI_LEV_2.webm/2023-08-18_ZOO_LJUBLJANA_Panthera_leo_persica_AZIJSKI_LEV_2.webm.480p.vp9.webm",
     "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
     "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-    "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
     "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-    "https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
-    "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-    "https://storage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4"
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
 ]
 
 def download_file(url, dest):
