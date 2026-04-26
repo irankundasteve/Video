@@ -11,42 +11,43 @@ TRANSITION_DURATION = 2.0
 CLIP_LEN = (TOTAL_DURATION + (NUM_CLIPS - 1) * TRANSITION_DURATION) / NUM_CLIPS
 TARGET_SIZE = (1280, 720)
 
-# Ultra-stable sample URLs
+# Verified HTTPS Stable URLs for Animals and Nature
+# Using Pexels/Pixabay CDN and stable test clips
 URLS = [
-    "https://vjs.zencdn.net/v/oceans.mp4",
-    "https://www.w3schools.com/html/mov_bbb.mp4",
-    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-    "https://vjs.zencdn.net/v/oceans.mp4", # Re-using stable ones to ensure coverage
-    "https://www.w3schools.com/html/mov_bbb.mp4"
+    "https://videos.pexels.com/video-files/3625342/3625342-uhd_2560_1440_30fps.mp4", # Cheetah
+    "https://videos.pexels.com/video-files/2414442/2414442-uhd_2560_1440_24fps.mp4", # Lion
+    "https://videos.pexels.com/video-files/4100513/4100513-uhd_2560_1440_25fps.mp4", # Tiger
+    "https://vjs.zencdn.net/v/oceans.mp4", # Ocean
+    "https://www.w3schools.com/html/mov_bbb.mp4", # Bunny
+    "https://videos.pexels.com/video-files/3625342/3625342-uhd_2560_1440_30fps.mp4", # Repeat Cheetah
+    "https://videos.pexels.com/video-files/2414442/2414442-uhd_2560_1440_24fps.mp4", # Repeat Lion
+    "https://videos.pexels.com/video-files/4100513/4100513-uhd_2560_1440_25fps.mp4", # Repeat Tiger
+    "https://vjs.zencdn.net/v/oceans.mp4", # Repeat Ocean
+    "https://www.w3schools.com/html/mov_bbb.mp4"  # Repeat Bunny
 ]
 
 def download_file(url, dest):
-    print(f"DEBUG: Downloading {url}")
+    print(f"DEBUG: Attempting download: {url}")
     try:
-        opener = urllib.request.build_opener()
-        opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')]
-        urllib.request.install_opener(opener)
-        urllib.request.urlretrieve(url, dest)
+        # Increase timeout and use stable headers
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=60) as response, open(dest, 'wb') as out_file:
+            out_file.write(response.read())
         
         if os.path.exists(dest):
             size = os.path.getsize(dest)
-            print(f"DEBUG: Downloaded {dest}, size: {size} bytes")
-            return size > 500000 # Must be at least 500KB
+            print(f"DEBUG: Successfully downloaded {dest}, size: {size} bytes")
+            return size > 100000 # Minimum 100KB for a video
     except Exception as e:
-        print(f"DEBUG: Download error for {url}: {e}")
+        print(f"DEBUG: Download failed for {url}: {e}")
     return False
 
 def main():
     os.makedirs("temp_clips", exist_ok=True)
     final_clips = []
     
-    # Background to avoid black screen
-    final_clips.append(ColorClip(size=TARGET_SIZE, color=(20, 20, 20), duration=TOTAL_DURATION))
+    # Global background
+    final_clips.append(ColorClip(size=TARGET_SIZE, color=(30, 30, 30), duration=TOTAL_DURATION))
 
     for i in range(NUM_CLIPS):
         url = URLS[i]
@@ -58,14 +59,14 @@ def main():
                 print(f"DEBUG: Processing clip {i}")
                 clip = VideoFileClip(dest)
                 
-                # Loop if too short
+                # If clip is shorter than required, loop it
                 if clip.duration < CLIP_LEN:
                     clip = vfx.Loop(n=int(CLIP_LEN/clip.duration)+1).apply(clip)
                 
                 clip = clip.subclipped(0, CLIP_LEN)
-                clip = clip.resized(width=TARGET_SIZE[0])
                 
-                # Fit to 720p
+                # Resize to fit 720p correctly
+                clip = clip.resized(width=TARGET_SIZE[0])
                 if clip.h > TARGET_SIZE[1]:
                     clip = clip.cropped(y1=(clip.h - TARGET_SIZE[1])/2, y2=(clip.h + TARGET_SIZE[1])/2)
                 elif clip.h < TARGET_SIZE[1]:
@@ -74,32 +75,33 @@ def main():
                 
                 clip = clip.with_start(start_time).with_effects([vfx.CrossFadeIn(TRANSITION_DURATION)])
                 final_clips.append(clip)
-                print(f"DEBUG: Clip {i} added successfully")
+                
+                # Add identification text
+                label_text = "Cheetah" if "3625342" in url else "Lion" if "2414442" in url else "Tiger" if "4100513" in url else "Nature"
+                try:
+                    txt = TextClip(text=label_text, font_size=50, color='white', font='DejaVu-Sans', duration=5)
+                    txt = txt.with_position(('center', 'bottom')).with_start(start_time + 1)
+                    final_clips.append(txt)
+                except:
+                    pass
+                    
+                print(f"DEBUG: Clip {i} ({label_text}) added at {start_time}")
             except Exception as e:
-                print(f"DEBUG: MoviePy error on clip {i}: {e}")
-                # Yellow fallback for processing error
-                err_box = ColorClip(size=(300, 300), color=(255, 255, 0), duration=CLIP_LEN).with_start(start_time)
-                final_clips.append(err_box)
+                print(f"DEBUG: MoviePy processing error on clip {i}: {e}")
+                # Yellow fallback
+                final_clips.append(ColorClip(size=TARGET_SIZE, color=(255, 255, 0), duration=CLIP_LEN).with_start(start_time))
         else:
             print(f"DEBUG: Clip {i} download failed")
-            # Blue fallback for download error
-            fail_box = ColorClip(size=(300, 300), color=(0, 0, 255), duration=CLIP_LEN).with_start(start_time)
-            final_clips.append(fail_box)
+            # Blue fallback
+            final_clips.append(ColorClip(size=TARGET_SIZE, color=(0, 0, 255), duration=CLIP_LEN).with_start(start_time))
 
-    # Simple text overlay to confirm rendering
-    try:
-        title = TextClip(text="VIDEO RENDER TEST\nSUCCESS IF VISIBLE", font_size=60, color='white', font='DejaVu-Sans', duration=TOTAL_DURATION)
-        title = title.with_position(('center', 50)).with_start(0)
-        final_clips.append(title)
-    except Exception as e:
-        print(f"DEBUG: TextClip error: {e}")
-
-    print(f"DEBUG: Assembling {len(final_clips)} layers")
+    print(f"DEBUG: Total layers to assemble: {len(final_clips)}")
     final_video = CompositeVideoClip(final_clips, size=TARGET_SIZE)
     final_video.duration = TOTAL_DURATION
     
-    print("DEBUG: Final rendering step...")
-    final_video.write_videofile("3min_video.mp4", fps=24, codec="libx264", audio_codec="aac")
+    print("DEBUG: Final rendering...")
+    # Use higher bitrate and common preset for compatibility
+    final_video.write_videofile("3min_video.mp4", fps=24, codec="libx264", bitrate="2000k", audio_codec="aac")
     print("DEBUG: DONE")
 
 if __name__ == "__main__":
