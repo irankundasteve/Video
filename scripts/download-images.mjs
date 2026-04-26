@@ -5,7 +5,7 @@ import axios from 'axios';
 const IMAGES = [
     "https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=1280",
     "https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?q=80&w=1280",
-    "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=1280", // Alternative
+    "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=1280",
     "https://images.unsplash.com/photo-1501705388883-4ed8a543392c?q=80&w=1280",
     "https://images.unsplash.com/photo-1508817628294-5a453fa0b8fb?q=80&w=1280",
     "https://images.unsplash.com/photo-1472393365320-dc77242e4501?q=80&w=1280",
@@ -33,9 +33,10 @@ const downloadImage = async (url, filepath) => {
             responseType: 'stream'
         });
         return new Promise((resolve, reject) => {
-            response.data.pipe(fs.createWriteStream(filepath))
-                .on('error', reject)
-                .once('close', () => resolve(filepath));
+            const writer = fs.createWriteStream(filepath);
+            response.data.pipe(writer);
+            writer.on('error', reject);
+            writer.on('finish', () => resolve(filepath));
         });
     } catch (e) {
         console.error(`Failed to download ${url}: ${e.message}`);
@@ -44,9 +45,14 @@ const downloadImage = async (url, filepath) => {
 };
 
 async function main() {
+    const dir = 'public/images';
+    if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    
     console.log("Starting image downloads...");
     for (let i = 0; i < IMAGES.length; i++) {
-        const dest = path.join('public/images', `img_${i}.jpg`);
+        const dest = path.join(dir, `img_${i}.jpg`);
         await downloadImage(IMAGES[i], dest);
         console.log(`Downloaded ${i + 1}/${IMAGES.length}`);
     }
