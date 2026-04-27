@@ -70,7 +70,7 @@ const Scene2 = () => {
   const shake = frame > 600 && frame < 615 ? Math.random() * 10 - 5 : 0;
   
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.bg, border: `20px solid ${interpolate(frame, [0, 300], [COLORS.bg, COLORS.red])}` }}>
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg, border: `20px solid ${interpolateColor(frame, [0, 300], [COLORS.bg, COLORS.red])}` }}>
       <Audio src={staticFile("/audio/scene2.mp3")} />
       <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', height: '100%', transform: `translate(${shake}px, ${shake}px)` }}>
         <div style={{ padding: 40, background: 'rgba(255,255,255,0.1)', borderRadius: 20, textAlign: 'center' }}>
