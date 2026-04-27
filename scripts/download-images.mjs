@@ -4,26 +4,26 @@ import axios from 'axios';
 import { execSync } from 'child_process';
 
 const IMAGES = [
-    "https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=1280",
-    "https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?q=80&w=1280",
-    "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=1280",
-    "https://images.unsplash.com/photo-1501705388883-4ed8a543392c?q=80&w=1280",
-    "https://images.unsplash.com/photo-1508817628294-5a453fa0b8fb?q=80&w=1280",
-    "https://images.unsplash.com/photo-1472393365320-dc77242e4501?q=80&w=1280",
-    "https://images.unsplash.com/photo-1557008075-7f2c5efa4cfd?q=80&w=1280",
-    "https://images.unsplash.com/photo-1517423738875-5ce310acd3da?q=80&w=1280",
-    "https://images.unsplash.com/photo-1547970810-248a21e70bf7?q=80&w=1280",
-    "https://images.unsplash.com/photo-1500463959177-e0869687df2b?q=80&w=1280",
-    "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=1280",
-    "https://images.unsplash.com/photo-1561731216-c3a4d99437d5?q=80&w=1280",
-    "https://images.unsplash.com/photo-1516233501032-2ddf7f031dcb?q=80&w=1280",
-    "https://images.unsplash.com/photo-1549480017-d76466a4b7e8?q=80&w=1280",
-    "https://images.unsplash.com/photo-1591824438708-ce405f36ba3d?q=80&w=1280",
-    "https://images.unsplash.com/photo-1504173010664-32509aaefe92?q=80&w=1280",
-    "https://images.unsplash.com/photo-1511967728238-d5063c9aa76a?q=80&w=1280",
-    "https://images.unsplash.com/photo-1475855581690-80accde3ae2b?q=80&w=1280",
-    "https://images.unsplash.com/photo-1543946207-39bd91e70ca7?q=80&w=1280",
-    "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?q=80&w=1280"
+    "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=1280", // Phone/Apps
+    "https://images.unsplash.com/photo-1553729459-efe14ef6055d?q=80&w=1280", // Money
+    "https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=1280", // Coding night
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1280", // Graph/Stats
+    "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1280", // Code screen
+    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1280", // UI/Business
+    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1280", // Team/Students
+    "https://images.unsplash.com/photo-1556742044-3c52d6e88c62?q=80&w=1280", // Payment/Success
+    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1280", // Solution/Tech
+    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1280", // Digital interface
+    "https://images.unsplash.com/photo-1559028012-481c04fa702d?q=80&w=1280", // Minimal UI
+    "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1280", // Wealth/Growth
+    "https://images.unsplash.com/photo-1504868584819-f8e90526354a?q=80&w=1280", // Analytics
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1280", // Laptop/Work
+    "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1280", // Binary/Global
+    "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1280", // Office/Productivity
+    "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?q=80&w=1280", // Customer/User
+    "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1280", // Collaboration
+    "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=1280", // Success/Check
+    "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1280"  // Confident business
 ];
 
 const downloadImage = async (url, filepath, retries = 5) => {
@@ -67,19 +67,10 @@ async function main() {
     for (let i = 0; i < IMAGES.length; i++) {
         const dest = path.join(dir, `img_${i}.jpg`);
         const success = await downloadImage(IMAGES[i], dest);
-        
         if (success) {
             console.log(`Downloaded ${i + 1}/${IMAGES.length}`);
         } else {
-            console.warn(`Creating fallback for image ${i}`);
-            // Use ffmpeg to create a colored placeholder if download fails
-            try {
-                execSync(`ffmpeg -y -f lavfi -i "color=c=gray:s=1280x720" -frames:v 1 "${dest}"`);
-            } catch (err) {
-                console.error("Failed to create fallback image with ffmpeg");
-                // Last resort: touch the file to at least exist
-                fs.writeFileSync(dest, "");
-            }
+            execSync(`ffmpeg -y -f lavfi -i "color=c=gray:s=1280x720" -frames:v 1 "${dest}"`);
         }
     }
 }
