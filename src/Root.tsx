@@ -7,7 +7,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Slideshow"
         component={Slideshow}
-        durationInFrames={180 * 30} // 3 minutes * 30 fps
+        durationInFrames={185 * 30} // 3:05 duration
         fps={30}
         width={1280}
         height={720}
