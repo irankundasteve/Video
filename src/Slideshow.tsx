@@ -1,6 +1,7 @@
 import {
   Series,
   interpolate,
+  interpolateColor,
   useCurrentFrame,
   useVideoConfig,
   Img,
