@@ -4,13 +4,13 @@ import * as googleTTS from 'google-tts-api';
 import axios from 'axios';
 
 const SCRIPT_SECTIONS = [
-  { name: 'scene1', text: "What if one app could make you money every single day, even while you sleep? No boss, no clients, just code." },
-  { name: 'scene2', text: "You build. You design. You publish. And then, nothing happens. Zero downloads. Zero users. Zero income." },
-  { name: 'scene3', text: "The problem is not your code. It’s your strategy. Apps that don’t solve problems, don’t survive." },
-  { name: 'scene4', text: "Here’s the system. Find a real problem. Build a simple solution. Charge for the outcome." },
-  { name: 'scene5', text: "A voice recorder is not enough. But a recorder that turns lectures into notes? That solves something real." },
-  { name: 'scene6', text: "Value creates demand. Demand creates revenue." },
-  { name: 'scene7', text: "Stop building randomly. Start building what people need." }
+  { name: 'scene1', text: "What if money itself was broken? Not slowly. Not eventually. Right now. And what if one thing, one protocol, was already fixing it?" },
+  { name: 'scene2', text: "Every government on Earth can print more of their currency. More money printed means your money buys less. That's called inflation. And it never stops. In the last 4 years alone, the U.S. printed 40 percent of all dollars ever made." },
+  { name: 'scene3', text: "Bitcoin was built to be different. It's decentralized, no government, no bank, no CEO controls it. It runs on math. On code. On consensus. And its supply? Fixed. Forever. 21 million. Not one more." },
+  { name: 'scene4', text: "Think about gold. Humans trusted it for 5,000 years. Why? Because no one could make more of it. Bitcoin is that, but digital. Verifiable. Portable. Instant. You can send a billion dollars worth, in 10 minutes, to anyone on Earth." },
+  { name: 'scene5', text: "This isn't a fringe idea anymore. El Salvador made it legal tender. BlackRock, Fidelity, the world's biggest asset managers, now hold it. Over 400 million people worldwide own Bitcoin." },
+  { name: 'scene6', text: "But let's be real. Bitcoin is volatile. It dropped 80 percent in 2022. It's not for everyone. It requires patience, research, and conviction. No one can promise you returns. No one." },
+  { name: 'scene7', text: "But the question isn't whether Bitcoin will survive. The question is whether you'll understand it before everyone else does. The shift has already started." }
 ];
 
 async function downloadAudio(url, dest) {
@@ -27,7 +27,7 @@ async function main() {
   const dir = 'public/audio';
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-  console.log("Generating Production Voice-Overs...");
+  console.log("Generating Bitcoin Script Voice-Overs...");
   for (const section of SCRIPT_SECTIONS) {
     const results = googleTTS.getAllAudioUrls(section.text, { lang: 'en', slow: false, host: 'https://translate.google.com' });
     const dest = path.join(dir, `${section.name}.mp3`);
