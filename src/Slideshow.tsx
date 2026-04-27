@@ -3,7 +3,6 @@ import {
   interpolate,
   useCurrentFrame,
   useVideoConfig,
-  Img,
   AbsoluteFill,
   staticFile,
   spring,
@@ -11,175 +10,178 @@ import {
   Audio,
 } from "remotion";
 
-// --- Visual Components ---
-
-const ProgressBar: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames, width } = useVideoConfig();
-  const barWidth = (frame / durationInFrames) * width;
-  return (
-    <div style={{
-      position: 'absolute', bottom: 0, left: 0, width: barWidth, height: 10,
-      backgroundColor: '#2ecc71', zIndex: 100
-    }} />
-  );
+const COLORS = {
+  bg: "#0B0F1A",
+  primary: "#FFFFFF",
+  accent: "#00E5A8",
+  secondary: "#6C7A89"
 };
 
-const OverlayText: React.FC<{ text: string; subtext?: string; delay?: number }> = ({ text, subtext, delay = 0 }) => {
+// --- Scene 1: Hook (0-600f) ---
+const Scene1 = () => {
   const frame = useCurrentFrame();
-  const opacity = interpolate(frame, [delay, delay + 15], [0, 1], { extrapolateRight: "clamp" });
-  const translateY = interpolate(frame, [delay, delay + 20], [30, 0], { easing: Easing.out(Easing.exp), extrapolateRight: "clamp" });
-
-  return (
-    <div style={{
-      position: 'absolute', top: '50%', width: '100%', textAlign: 'center',
-      opacity, transform: `translateY(${translateY}px)`, zIndex: 10
-    }}>
-      <h1 style={{ color: 'white', fontSize: 80, fontWeight: 'bold', textShadow: '0 5px 15px rgba(0,0,0,0.5)', margin: 0 }}>
-        {text}
-      </h1>
-      {subtext && (
-        <h2 style={{ color: '#2ecc71', fontSize: 40, marginTop: 10 }}>{subtext}</h2>
-      )}
-    </div>
-  );
-};
-
-const BackgroundImage: React.FC<{ index: number; zoomDirection?: 'in' | 'out' }> = ({ index, zoomDirection = 'in' }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const scale = spring({
-    frame, fps, config: { damping: 200 },
-    from: zoomDirection === 'in' ? 1 : 1.2,
-    to: zoomDirection === 'in' ? 1.2 : 1,
-  });
-
-  return (
-    <AbsoluteFill style={{ overflow: 'hidden' }}>
-      <Img
-        src={staticFile(`/images/img_${index}.jpg`)}
-        style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }}
-      />
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'radial-gradient(circle, transparent 20%, rgba(0,0,0,0.6) 100%)'
-      }} />
-    </AbsoluteFill>
-  );
-};
-
-// --- Script Sections with Audio ---
-
-const Section: React.FC<{ 
-  audioName: string; 
-  children: React.ReactNode;
-}> = ({ audioName, children }) => {
-  return (
-    <AbsoluteFill>
-      <Audio src={staticFile(`/audio/${audioName}.mp3`)} />
-      {children}
-    </AbsoluteFill>
-  );
-}
-
-const Hook: React.FC = () => (
-  <Section audioName="hook">
-    <BackgroundImage index={0} />
-    <OverlayText text="Build Once." subtext="Earn Forever." />
-  </Section>
-);
-
-const Problem: React.FC = () => (
-  <Section audioName="problem">
-    <BackgroundImage index={2} zoomDirection="out" />
-    <OverlayText text="No Strategy =" subtext="No Results." delay={30} />
-  </Section>
-);
-
-const Shift: React.FC = () => (
-  <Section audioName="shift">
-    <BackgroundImage index={3} />
-    <OverlayText text="Solve Real Problems" subtext="For Real People" delay={20} />
-  </Section>
-);
-
-const Framework: React.FC = () => {
-  const frame = useCurrentFrame();
-  const opacity1 = interpolate(frame, [10, 25], [0, 1], { extrapolateRight: "clamp" });
-  const opacity2 = interpolate(frame, [40, 55], [0, 1], { extrapolateRight: "clamp" });
-  const opacity3 = interpolate(frame, [70, 85], [0, 1], { extrapolateRight: "clamp" });
-
-  return (
-    <Section audioName="framework">
-      <AbsoluteFill style={{ backgroundColor: '#1a1a1a' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 40 }}>
-          <div style={{ opacity: opacity1, background: '#333', padding: '20px 40px', borderRadius: 10, width: 600, color: 'white', fontSize: 30, textAlign: 'center' }}>
-            1. Find a Painful Problem
-          </div>
-          <div style={{ opacity: opacity2, background: '#333', padding: '20px 40px', borderRadius: 10, width: 600, color: 'white', fontSize: 30, textAlign: 'center' }}>
-            2. Build a Simple Tool
-          </div>
-          <div style={{ opacity: opacity3, background: '#2ecc71', padding: '20px 40px', borderRadius: 10, width: 600, color: 'white', fontSize: 30, textAlign: 'center' }}>
-            3. Charge for Value
-          </div>
-        </div>
-      </AbsoluteFill>
-    </Section>
-  );
-};
-
-const Example: React.FC = () => (
-  <Section audioName="example">
-    <BackgroundImage index={5} />
-    <OverlayText text="Don't build just an app." subtext="Build a Solution." />
-  </Section>
-);
-
-const Monetization: React.FC = () => (
-  <Section audioName="monetization">
-    <BackgroundImage index={7} />
-    <OverlayText text="People pay for" subtext="RESULTS." delay={15} />
-  </Section>
-);
-
-const Closing: React.FC = () => (
-  <Section audioName="closing">
-    <BackgroundImage index={19} />
-    <OverlayText text="Build Smart." subtext="Earn Consistently." delay={10} />
-  </Section>
-);
-
-// --- Main Composition ---
-
-export const Slideshow: React.FC = () => {
   const { fps } = useVideoConfig();
   
+  const scale = spring({ frame, fps, config: { damping: 12 }, from: 0.9, to: 1 });
+  const pulse = Math.sin(frame / 5) * 0.05 + 1;
+
   return (
-    <AbsoluteFill style={{ backgroundColor: 'black', fontFamily: 'Arial' }}>
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Audio src={staticFile("/audio/scene1.mp3")} />
+      <div style={{ transform: `scale(${scale * pulse})`, textAlign: 'center' }}>
+        <h1 style={{ color: COLORS.primary, fontSize: 80, fontWeight: 'bold' }}>
+          Build Once. <span style={{ color: COLORS.accent }}>Earn Forever.</span>
+        </h1>
+        <div style={{ display: 'flex', gap: 40, marginTop: 40 }}>
+           {[1,2,3].map(i => (
+             <div key={i} style={{ width: 150, height: 200, background: COLORS.secondary, borderRadius: 20, opacity: 0.8 }} />
+           ))}
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// --- Scene 2: Problem (600-1500f) ---
+const Scene2 = () => {
+  const frame = useCurrentFrame();
+  const text = "ZERO DOWNLOADS. ZERO INCOME.";
+  const charsShown = Math.floor(frame / 3);
+  
+  return (
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+      <Audio src={staticFile("/audio/scene2.mp3")} />
+      <div style={{ fontSize: 100, fontWeight: 'bold', color: COLORS.accent }}>
+        {text.substring(0, charsShown)}
+        <span style={{ opacity: frame % 10 > 5 ? 1 : 0 }}>|</span>
+      </div>
+      <div style={{ color: COLORS.secondary, fontSize: 40, marginTop: 20 }}>No Strategy = No Results</div>
+    </AbsoluteFill>
+  );
+};
+
+// --- Scene 3: Truth (1500-2400f) ---
+const Scene3 = () => {
+  const frame = useCurrentFrame();
+  const opacity = interpolate(frame, [0, 30], [0, 1]);
+  const shiftX = interpolate(frame, [30, 60], [0, -100], { extrapolateRight: "clamp" });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Audio src={staticFile("/audio/scene3.mp3")} />
+      <h1 style={{ color: COLORS.primary, fontSize: 70, opacity, transform: `translateX(${shiftX}px)` }}>
+        THE PROBLEM IS <span style={{ textDecoration: 'line-through' }}>YOUR CODE</span>
+      </h1>
+      {frame > 60 && (
+        <h1 style={{ color: COLORS.accent, fontSize: 90, position: 'absolute', right: 200 }}>
+          YOUR STRATEGY
+        </h1>
+      )}
+    </AbsoluteFill>
+  );
+};
+
+// --- Scene 4: Framework (2400-3600f) ---
+const Scene4 = () => {
+  const frame = useCurrentFrame();
+  const items = [
+    { icon: "⚠️", label: "Problem" },
+    { icon: "🛠️", label: "Solution" },
+    { icon: "💰", label: "Outcome" }
+  ];
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 50 }}>
+      <Audio src={staticFile("/audio/scene4.mp3")} />
+      {items.map((item, i) => {
+        const entry = spring({ frame: frame - (i * 20), fps: 30, from: 0, to: 1 });
+        const active = frame > 400 + (i * 100) && frame < 500 + (i * 100);
+        return (
+          <div key={i} style={{ 
+            background: active ? COLORS.accent : COLORS.secondary,
+            padding: '40px', borderRadius: '20px', textAlign: 'center', width: 250,
+            transform: `scale(${entry * (active ? 1.1 : 1)})`,
+            opacity: entry
+          }}>
+            <div style={{ fontSize: 60 }}>{item.icon}</div>
+            <div style={{ color: COLORS.bg, fontWeight: 'bold', fontSize: 30 }}>{item.label}</div>
+          </div>
+        )
+      })}
+    </AbsoluteFill>
+  );
+};
+
+// --- Scene 5: Example (3600-4500f) ---
+const Scene5 = () => {
+  return (
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Audio src={staticFile("/audio/scene5.mp3")} />
+      <div style={{ width: '50%', textAlign: 'center', borderRight: `2px solid ${COLORS.secondary}`, padding: 50 }}>
+         <h2 style={{ color: COLORS.secondary }}>Basic Recorder</h2>
+         <p style={{ color: COLORS.secondary, textDecoration: 'line-through' }}>Not Enough</p>
+      </div>
+      <div style={{ width: '50%', textAlign: 'center', padding: 50 }}>
+         <h2 style={{ color: COLORS.accent }}>AI Student Recorder</h2>
+         <p style={{ color: COLORS.primary }}>Solving Something Real</p>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// --- Scene 6: Monetization (4500-5100f) ---
+const Scene6 = () => {
+  const frame = useCurrentFrame();
+  const count = Math.floor(interpolate(frame, [0, 60], [0, 299], { easing: Easing.out(Easing.cubic) }));
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Audio src={staticFile("/audio/scene6.mp3")} />
+      <div style={{ textAlign: 'center' }}>
+        <h3 style={{ color: COLORS.secondary }}>Subscription Revenue</h3>
+        <div style={{ fontSize: 150, color: COLORS.accent, fontWeight: 'bold' }}>
+          ${count}
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// --- Scene 7: Closing (5100-5400f) ---
+const Scene7 = () => {
+  const frame = useCurrentFrame();
+  const underlineWidth = interpolate(frame, [10, 40], [0, 100], { extrapolateRight: "clamp" });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Audio src={staticFile("/audio/scene7.mp3")} />
+      <div style={{ textAlign: 'center' }}>
+        <h1 style={{ color: COLORS.primary, fontSize: 80 }}>Build Smart.</h1>
+        <h1 style={{ color: COLORS.accent, fontSize: 80, position: 'relative' }}>
+          Earn Consistently.
+          <div style={{ 
+            position: 'absolute', bottom: -10, left: 0, height: 8, background: COLORS.accent,
+            width: `${underlineWidth}%`
+          }} />
+        </h1>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// --- Main Root ---
+export const Slideshow: React.FC = () => {
+  return (
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg }}>
       <Series>
-        <Series.Sequence durationInFrames={20 * fps}>
-          <Hook />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={30 * fps}>
-          <Problem />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={30 * fps}>
-          <Shift />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={35 * fps}>
-          <Framework />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={30 * fps}>
-          <Example />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={20 * fps}>
-          <Monetization />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={15 * fps}>
-          <Closing />
-        </Series.Sequence>
+        <Series.Sequence durationInFrames={600}><Scene1 /></Series.Sequence>
+        <Series.Sequence durationInFrames={900}><Scene2 /></Series.Sequence>
+        <Series.Sequence durationInFrames={900}><Scene3 /></Series.Sequence>
+        <Series.Sequence durationInFrames={1200}><Scene4 /></Series.Sequence>
+        <Series.Sequence durationInFrames={900}><Scene5 /></Series.Sequence>
+        <Series.Sequence durationInFrames={600}><Scene6 /></Series.Sequence>
+        <Series.Sequence durationInFrames={300}><Scene7 /></Series.Sequence>
       </Series>
-      <ProgressBar />
     </AbsoluteFill>
   );
 };
