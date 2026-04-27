@@ -55,7 +55,7 @@ async function main() {
         const success = await downloadImage(IMAGES[i], dest);
         if (!success) {
             console.warn(`Creating fallback for image ${i}`);
-            execSync(`ffmpeg -y -f lavfi -i "color=c=black:s=1280x720" -frames:v 1 "${dest}"`);
+            execSync(`ffmpeg -y -f lavfi -i "color=c=black:s=1280x720" -frames:v 1 -update 1 "${dest}"`);
         }
     }
 }

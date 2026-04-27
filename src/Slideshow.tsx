@@ -1,7 +1,6 @@
 import {
   Series,
   interpolate,
-  interpolateColor,
   useCurrentFrame,
   useVideoConfig,
   Img,
@@ -69,9 +68,20 @@ const Scene2 = () => {
   const dollarVal = interpolate(frame, [0, 450], [1.00, 0.61], { extrapolateRight: "clamp" });
   const shake = frame > 600 && frame < 615 ? Math.random() * 10 - 5 : 0;
   
+  // Use opacity fade for border instead of interpolateColor to avoid runtime errors
+  const borderOpacity = interpolate(frame, [0, 300], [0, 1], { extrapolateRight: "clamp" });
+  
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.bg, border: `20px solid ${interpolateColor(frame, [0, 300], [COLORS.bg, COLORS.red])}` }}>
+    <AbsoluteFill style={{ backgroundColor: COLORS.bg }}>
       <Audio src={staticFile("/audio/scene2.mp3")} />
+      
+      {/* Animated Border */}
+      <AbsoluteFill style={{ 
+        border: `20px solid ${COLORS.red}`,
+        opacity: borderOpacity,
+        pointerEvents: 'none'
+      }} />
+
       <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', height: '100%', transform: `translate(${shake}px, ${shake}px)` }}>
         <div style={{ padding: 40, background: 'rgba(255,255,255,0.1)', borderRadius: 20, textAlign: 'center' }}>
            <h2 style={{ color: COLORS.primary }}>PURCHASING POWER</h2>
