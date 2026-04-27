@@ -8,6 +8,7 @@ import {
   staticFile,
   spring,
   Easing,
+  Audio,
 } from "remotion";
 
 // --- Visual Components ---
@@ -67,27 +68,39 @@ const BackgroundImage: React.FC<{ index: number; zoomDirection?: 'in' | 'out' }>
   );
 };
 
-// --- Script Sections ---
+// --- Script Sections with Audio ---
+
+const Section: React.FC<{ 
+  audioName: string; 
+  children: React.ReactNode;
+}> = ({ audioName, children }) => {
+  return (
+    <AbsoluteFill>
+      <Audio src={staticFile(`/audio/${audioName}.mp3`)} />
+      {children}
+    </AbsoluteFill>
+  );
+}
 
 const Hook: React.FC = () => (
-  <AbsoluteFill>
+  <Section audioName="hook">
     <BackgroundImage index={0} />
     <OverlayText text="Build Once." subtext="Earn Forever." />
-  </AbsoluteFill>
+  </Section>
 );
 
 const Problem: React.FC = () => (
-  <AbsoluteFill>
+  <Section audioName="problem">
     <BackgroundImage index={2} zoomDirection="out" />
     <OverlayText text="No Strategy =" subtext="No Results." delay={30} />
-  </AbsoluteFill>
+  </Section>
 );
 
 const Shift: React.FC = () => (
-  <AbsoluteFill>
+  <Section audioName="shift">
     <BackgroundImage index={3} />
     <OverlayText text="Solve Real Problems" subtext="For Real People" delay={20} />
-  </AbsoluteFill>
+  </Section>
 );
 
 const Framework: React.FC = () => {
@@ -97,41 +110,43 @@ const Framework: React.FC = () => {
   const opacity3 = interpolate(frame, [70, 85], [0, 1], { extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#1a1a1a' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 40 }}>
-        <div style={{ opacity: opacity1, background: '#333', padding: '20px 40px', borderRadius: 10, width: 600, color: 'white', fontSize: 30, textAlign: 'center' }}>
-          1. Find a Painful Problem
+    <Section audioName="framework">
+      <AbsoluteFill style={{ backgroundColor: '#1a1a1a' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 40 }}>
+          <div style={{ opacity: opacity1, background: '#333', padding: '20px 40px', borderRadius: 10, width: 600, color: 'white', fontSize: 30, textAlign: 'center' }}>
+            1. Find a Painful Problem
+          </div>
+          <div style={{ opacity: opacity2, background: '#333', padding: '20px 40px', borderRadius: 10, width: 600, color: 'white', fontSize: 30, textAlign: 'center' }}>
+            2. Build a Simple Tool
+          </div>
+          <div style={{ opacity: opacity3, background: '#2ecc71', padding: '20px 40px', borderRadius: 10, width: 600, color: 'white', fontSize: 30, textAlign: 'center' }}>
+            3. Charge for Value
+          </div>
         </div>
-        <div style={{ opacity: opacity2, background: '#333', padding: '20px 40px', borderRadius: 10, width: 600, color: 'white', fontSize: 30, textAlign: 'center' }}>
-          2. Build a Simple Tool
-        </div>
-        <div style={{ opacity: opacity3, background: '#2ecc71', padding: '20px 40px', borderRadius: 10, width: 600, color: 'white', fontSize: 30, textAlign: 'center' }}>
-          3. Charge for Value
-        </div>
-      </div>
-    </AbsoluteFill>
+      </AbsoluteFill>
+    </Section>
   );
 };
 
 const Example: React.FC = () => (
-  <AbsoluteFill>
+  <Section audioName="example">
     <BackgroundImage index={5} />
     <OverlayText text="Don't build just an app." subtext="Build a Solution." />
-  </AbsoluteFill>
+  </Section>
 );
 
 const Monetization: React.FC = () => (
-  <AbsoluteFill>
+  <Section audioName="monetization">
     <BackgroundImage index={7} />
     <OverlayText text="People pay for" subtext="RESULTS." delay={15} />
-  </AbsoluteFill>
+  </Section>
 );
 
 const Closing: React.FC = () => (
-  <AbsoluteFill>
+  <Section audioName="closing">
     <BackgroundImage index={19} />
     <OverlayText text="Build Smart." subtext="Earn Consistently." delay={10} />
-  </AbsoluteFill>
+  </Section>
 );
 
 // --- Main Composition ---
