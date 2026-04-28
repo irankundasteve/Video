@@ -6,6 +6,7 @@ import {
   AbsoluteFill,
   staticFile,
   spring,
+  Easing,
   Audio,
 } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Nunito";
