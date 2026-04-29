@@ -14,37 +14,52 @@ import { loadFont } from "@remotion/google-fonts/Inter";
 const { fontFamily } = loadFont();
 
 const COLORS = {
-  bg: "#000000",
-  text: "#FFFFFF",
-  gold: "#F5A623",
-  grey: "#6C7A89",
+  white: "#F5F5F5",
+  grey: "#2F2F2F",
+  gold: "#D4AF37",
+  green: "#27AE60",
+  red: "#E74C3C"
 };
-
-// --- Scene Components ---
 
 const Scene1 = () => {
   const frame = useCurrentFrame();
-  const imagineOp = interpolate(frame, [0, 15], [0, 1]);
-  const snapIn = frame > 45; // ~1.5s
+  const { fps } = useVideoConfig();
   
-  // Transition to Scene 2 part
-  const shiftLeft = interpolate(frame, [75, 90], [0, -400], { extrapolateRight: 'clamp' });
-  const compress = interpolate(frame, [75, 90], [1, 0.7], { extrapolateRight: 'clamp' });
+  // BAKER falls
+  const bakerDrop = spring({ frame, fps, config: { damping: 10, stiffness: 100 }, from: -200, to: 0 });
+  const dustOpacity = interpolate(frame, [15, 30], [0, 0.5], { extrapolateRight: 'clamp' });
+  
+  // Slicing at 2.5s (frame 75)
+  const slicePos = interpolate(frame, [75, 80], [0, 100], { extrapolateRight: 'clamp' });
+  const haircutOp = interpolate(frame, [80, 95], [0, 1]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily }}>
+    <AbsoluteFill style={{ backgroundColor: COLORS.grey, display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily }}>
       <Audio src={staticFile("/audio/part1.mp3")} />
-      <div style={{ transform: `translateX(${shiftLeft}px) scaleX(${compress})`, textAlign: 'center' }}>
-        <div style={{ opacity: imagineOp, fontSize: 48, fontWeight: 400 }}>Imagine</div>
-        {snapIn && (
-          <div style={{ fontSize: 120, fontWeight: 900, marginTop: 20 }}>you're a baker,</div>
-        )}
+      
+      {/* Baker Text */}
+      <div style={{ transform: `translateY(${bakerDrop}px)`, position: 'relative' }}>
+         <h1 style={{ 
+           fontSize: 250, fontWeight: 900, color: COLORS.white, margin: 0, 
+           letterSpacing: -10, clipPath: frame > 75 ? `inset(0 0 ${slicePos}% 0)` : 'none' 
+         }}>
+           BAKER
+         </h1>
+         {/* Dust Puff */}
+         <div style={{ 
+           position: 'absolute', bottom: -50, left: '50%', transform: 'translateX(-50%)',
+           width: 300, height: 100, background: 'rgba(255,255,255,0.2)', 
+           borderRadius: '50%', filter: 'blur(40px)', opacity: dustOpacity 
+         }} />
       </div>
-      {frame > 75 && (
-        <div style={{ position: 'absolute', right: 200, display: 'flex', alignItems: 'baseline', gap: 20 }}>
-           <span style={{ fontSize: 32, color: COLORS.grey }}>and you need</span>
-           <span style={{ fontSize: 96, fontWeight: 900 }}>a haircut.</span>
-        </div>
+
+      {frame > 80 && (
+        <h1 style={{ 
+          position: 'absolute', fontSize: 180, fontWeight: 100, 
+          color: COLORS.white, opacity: haircutOp, letterSpacing: 20 
+        }}>
+          HAIRCUT
+        </h1>
       )}
     </AbsoluteFill>
   );
@@ -53,18 +68,23 @@ const Scene1 = () => {
 const Scene2 = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const scale10 = spring({ frame, fps, from: 0, to: 1.5 });
   
-  const breadEntry = spring({ frame, fps, from: 0, to: 1 });
-  const offerFlyIn = interpolate(frame, [20, 35], [-200, 0], { easing: Easing.out(Easing.exp), extrapolateRight: 'clamp' });
-
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', fontFamily }}>
+    <AbsoluteFill style={{ backgroundColor: COLORS.grey, display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily }}>
       <Audio src={staticFile("/audio/part2.mp3")} />
-      <div style={{ transform: `translateY(${offerFlyIn}px)`, opacity: frame > 20 ? 1 : 0, fontSize: 48, marginBottom: 40 }}>
-        You offer the barber
+      <div style={{ transform: `scale(${scale10})`, fontSize: 300, fontWeight: 900, color: COLORS.white, opacity: 0.2 }}>
+        10
       </div>
-      <div style={{ transform: `scale(${breadEntry})`, fontSize: 80, fontWeight: 900, textAlign: 'center', lineHeight: 1.1 }}>
-        TEN LOAVES<br/>OF BREAD.
+      <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', gap: 5 }}>
+        {[...Array(10)].map((_, i) => (
+          <div key={i} style={{ 
+            fontSize: 40, fontWeight: 900, color: COLORS.gold, 
+            opacity: frame > i * 3 ? 1 : 0, textAlign: 'center' 
+          }}>
+            BREAD
+          </div>
+        ))}
       </div>
     </AbsoluteFill>
   );
@@ -72,37 +92,50 @@ const Scene2 = () => {
 
 const Scene3 = () => {
   const frame = useCurrentFrame();
-  const shrink = interpolate(frame, [0, 20], [1, 0.6], { extrapolateRight: 'clamp' });
-  const desaturate = interpolate(frame, [0, 20], [1, 0.3], { extrapolateRight: 'clamp' });
-  const tilt = interpolate(frame, [30, 75], [0, 8], { extrapolateRight: 'clamp' });
+  const shake = Math.sin(frame) * 10;
+  const noScale = spring({ frame: frame - 15, fps: 30, from: 0, to: 1 });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily }}>
+    <AbsoluteFill style={{ backgroundColor: COLORS.grey, display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily }}>
       <Audio src={staticFile("/audio/part3.mp3")} />
-      <div style={{ 
-        transform: `scale(${shrink}) rotate(${tilt}deg)`, 
-        opacity: desaturate,
-        textAlign: 'center' 
-      }}>
-        <div style={{ fontSize: 48 }}>But what if he doesn't want</div>
-        <div style={{ fontSize: 120, fontWeight: 900, color: 'white', opacity: 1/desaturate }}>BREAD</div>
+      <div style={{ transform: `rotate(${shake}deg) translateY(${frame}px)`, opacity: interpolate(frame, [0, 30], [1, 0.5]) }}>
+        {[...Array(10)].map((_, i) => (
+          <div key={i} style={{ fontSize: 40, fontWeight: 900, color: COLORS.red, textAlign: 'center' }}>
+            BREAD
+          </div>
+        ))}
       </div>
+      {frame > 15 && (
+        <div style={{ 
+          position: 'absolute', fontSize: 400, fontWeight: 900, color: COLORS.red, 
+          transform: `scale(${noScale}) rotate(-15deg)`, textShadow: '0 0 50px black' 
+        }}>
+          NO
+        </div>
+      )}
     </AbsoluteFill>
   );
 };
 
 const Scene4 = () => {
   const frame = useCurrentFrame();
-  const tracking = interpolate(frame, [15, 60], [50, 0], { extrapolateRight: 'clamp' });
+  const crack = frame > 45;
 
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', fontFamily }}>
+    <AbsoluteFill style={{ backgroundColor: COLORS.grey, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', fontFamily }}>
       <Audio src={staticFile("/audio/part4.mp3")} />
-      <div style={{ fontSize: 100, fontWeight: 900, color: COLORS.gold, textTransform: 'uppercase' }}>
-        THE PROBLEM
+      <h1 style={{ color: COLORS.white, fontSize: 120, fontWeight: 900 }}>BARTER</h1>
+      
+      <div style={{ display: 'flex', alignItems: 'center', gap: 100, marginTop: 50, position: 'relative' }}>
+         <div style={{ fontSize: 80 }}>🍞</div>
+         <div style={{ width: 300, height: 10, background: COLORS.white, position: 'relative' }}>
+            {crack && <div style={{ position: 'absolute', left: '50%', top: -20, fontSize: 40 }}>⚡</div>}
+         </div>
+         <div style={{ fontSize: 80 }}>✂️</div>
       </div>
-      <div style={{ fontSize: 80, letterSpacing: tracking, marginTop: 20 }}>
-        BARTER—{frame % 20 > 10 ? '_' : ''}
+
+      <div style={{ marginTop: 100, textAlign: 'center' }}>
+        {frame % 10 < 5 && <h2 style={{ color: COLORS.gold, fontSize: 80, fontWeight: 900 }}>SAME TIME</h2>}
       </div>
     </AbsoluteFill>
   );
@@ -110,66 +143,48 @@ const Scene4 = () => {
 
 const Scene5 = () => {
   const frame = useCurrentFrame();
-  const bridgeOp = interpolate(frame, [20, 45], [0, 1]);
-  const lineScale = interpolate(frame, [50, 70], [0, 1], { extrapolateRight: 'clamp' });
+  const sweep = interpolate(frame, [0, 10], [100, -100]);
+  const bg = interpolate(frame, [0, 15], [0, 1]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.bg, fontFamily, padding: 100 }}>
+    <AbsoluteFill style={{ 
+      backgroundColor: interpolateColor(bg, [0, 1], [COLORS.grey, COLORS.green]), 
+      display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily 
+    }}>
       <Audio src={staticFile("/audio/part5.mp3")} />
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 60, fontWeight: 900 }}>
-        <span>you</span>
-        <span>the other</span>
-      </div>
+      
+      {/* Clean Sweep */}
       <div style={{ 
-        position: 'absolute', top: '40%', width: '100%', textAlign: 'center', 
-        opacity: bridgeOp, fontSize: 48, fontStyle: 'italic', color: COLORS.grey 
-      }}>
-        have to want what
-      </div>
-      <div style={{ position: 'absolute', bottom: '30%', width: '100%', textAlign: 'center' }}>
-        <div style={{ fontSize: 70, fontWeight: 900, color: COLORS.gold, opacity: frame > 50 ? 1 : 0 }}>
-          at the same time.
+        position: 'absolute', left: `${sweep}%`, width: '100%', height: '100%', 
+        background: 'white', zIndex: 10 
+      }} />
+
+      <div style={{ textAlign: 'center', zIndex: 5 }}>
+        <div style={{ fontSize: 300, color: COLORS.gold, fontWeight: 900, textShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+          $
         </div>
-        <div style={{ 
-          height: 4, background: COLORS.gold, marginTop: 20, margin: '0 auto',
-          width: '80%', transform: `scaleX(${lineScale})`
-        }} />
+        <h1 style={{ fontSize: 100, fontWeight: 900, color: COLORS.white, marginTop: -50 }}>
+          CURRENCY
+        </h1>
       </div>
     </AbsoluteFill>
   );
 };
 
-const Scene6 = () => {
-  const frame = useCurrentFrame();
-  const solvedOp = interpolate(frame, [15, 30], [0, 1]);
-
-  return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.bg, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', fontFamily }}>
-      <Audio src={staticFile("/audio/part6.mp3")} />
-      <div style={{ fontSize: 180, fontWeight: 900, color: 'white' }}>
-        CURRENCY
-      </div>
-      <div style={{ fontSize: 60, color: COLORS.gold, opacity: solvedOp, marginTop: 20 }}>
-        solves that.
-      </div>
-    </AbsoluteFill>
-  );
+// Helper since interpolateColor was having issues earlier, using a simplified version or just background color transition
+const interpolateColor = (val: number, range: number[], colors: string[]) => {
+  return val > 0.5 ? colors[1] : colors[0];
 };
-
-// --- Main Root ---
 
 export const Slideshow: React.FC = () => {
   const { fps } = useVideoConfig();
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.bg }}>
-      <Series>
-        <Series.Sequence durationInFrames={4 * fps}><Scene1 /></Series.Sequence>
-        <Series.Sequence durationInFrames={2 * fps}><Scene2 /></Series.Sequence>
-        <Series.Sequence durationInFrames={2.5 * fps}><Scene3 /></Series.Sequence>
-        <Series.Sequence durationInFrames={2.5 * fps}><Scene4 /></Series.Sequence>
-        <Series.Sequence durationInFrames={3 * fps}><Scene5 /></Series.Sequence>
-        <Series.Sequence durationInFrames={2 * fps}><Scene6 /></Series.Sequence>
-      </Series>
-    </AbsoluteFill>
+    <Series>
+      <Series.Sequence durationInFrames={4 * fps}><Scene1 /></Series.Sequence>
+      <Series.Sequence durationInFrames={3 * fps}><Scene2 /></Series.Sequence>
+      <Series.Sequence durationInFrames={3 * fps}><Scene3 /></Series.Sequence>
+      <Series.Sequence durationInFrames={3 * fps}><Scene4 /></Series.Sequence>
+      <Series.Sequence durationInFrames={3 * fps}><Scene5 /></Series.Sequence>
+    </Series>
   );
 };
