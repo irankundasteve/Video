@@ -4,6 +4,11 @@ on:
   push:
     branches: [ master, main ]
   workflow_dispatch:
+    inputs:
+      composition_id:
+        description: 'The ID of the composition to render'
+        required: true
+        default: 'BakerBarberKinetic'
 
 jobs:
   render:
@@ -25,10 +30,13 @@ jobs:
           npm install
 
       - name: Render Video
-        run: npm run build
+        run: |
+          # Use the input ID if manually triggered, otherwise default to BakerBarberKinetic
+          COMP_ID=${{ github.event.inputs.composition_id || 'BakerBarberKinetic' }}
+          npx remotion render src/index.ts $COMP_ID out/video.mp4
 
       - name: Upload Video
         uses: actions/upload-artifact@v4
         with:
-          name: remotion-video
+          name: ${{ github.event.inputs.composition_id || 'BakerBarberKinetic' }}-video
           path: out/video.mp4
