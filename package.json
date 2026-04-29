@@ -10,9 +10,9 @@
     "build": "remotion render src/index.ts Slideshow out/video.mp4"
   },
   "dependencies": {
-    "remotion": "^4.0.0",
-    "@remotion/cli": "^4.0.0",
-    "@remotion/renderer": "^4.0.0",
+    "remotion": "4.0.454",
+    "@remotion/cli": "4.0.454",
+    "@remotion/renderer": "4.0.454",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "@types/react": "^18.0.0",
@@ -20,7 +20,6 @@
     "typescript": "^5.0.0",
     "axios": "^1.6.0",
     "google-tts-api": "^2.0.2",
-    "@remotion/google-fonts": "^4.0.0",
-    "inter-ui": "^3.19.3"
+    "@remotion/google-fonts": "4.0.454"
   }
 }

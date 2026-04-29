@@ -29,9 +29,11 @@ jobs:
           sudo apt-get install -y ffmpeg
           npm install
 
+      - name: Prebuild Assets
+        run: npm run prebuild
+
       - name: Render Video
         run: |
-          # Use the input ID if manually triggered, otherwise default to BakerBarberKinetic
           COMP_ID=${{ github.event.inputs.composition_id || 'BakerBarberKinetic' }}
           npx remotion render src/index.ts $COMP_ID out/video.mp4
 
